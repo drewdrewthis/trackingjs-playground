@@ -1,0 +1,11 @@
+{
+  "name": "TrackPlay",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:drewdrewthis/trackingjs-playground.git",
+  "author": "drew <drewdrewthis@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "tracking": "^1.1.3"
+  }
+}
