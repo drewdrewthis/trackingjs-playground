@@ -142,19 +142,38 @@
           event.data.sort(function(a, b) {
             return b.confidence - a.confidence;
           });
+
           // Re-draws template on canvas.
           context.putImageData(templateImageData, boxLeft, 0);
 
+          var confidenceArr = event.data.map(match => {
+            var conf = match.confidence;
+            conf = conf - event.data[event.data.length - 1].confidence;
+            return (1 / event.data[0].confidence) * conf;
+          });
+
+          console.log(confidenceArr);
+
+          if (confidenceArr.length) {
+            event.data.map(x => console.log(x.confidence));
+            throw new Error(confidenceArr.toString());
+          }
+
           // Plots lines connecting matches.
-          for (var i = 0; i < Math.min(10, event.data.length); i++) {
-            var template = event.data[i].keypoint1;
-            var frame = event.data[i].keypoint2;
+          // for (var i = 0; i < Math.min(10, event.data.length); i++) {
+          event.data.forEach(match => {
+            var conf = match.confidence;
+            conf = conf - event.data[event.data.length - 1].confidence;
+            var confidence = conf * (1 / event.data[0].confidence);
+
+            var template = match.keypoint1;
+            var frame = match.keypoint2;
             context.beginPath();
-            context.strokeStyle = "magenta";
+            context.strokeStyle = `rgba(255, 0, 0, ${confidence})`;
             context.moveTo(frame[0], frame[1]);
             context.lineTo(boxLeft + template[0], template[1]);
             context.stroke();
-          }
+          });
         });
 
         var trackerTask = tracking.track(video, tracker, { camera: true });
