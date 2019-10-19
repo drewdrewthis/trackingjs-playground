@@ -12,7 +12,7 @@ class Impose {
       return b.confidence - a.confidence;
     });
 
-    data.length = 10;
+    // data.length = 10;
 
     this.matchArr = data;
 
@@ -49,6 +49,51 @@ class Impose {
     );
   }
 
+  get rotationDeg() {
+    var values = this.similarityTransform[0][0];
+    var a = values[0];
+    var b = values[1];
+    return Math.round(Math.atan2(b, a) * (180 / Math.PI));
+  }
+
+  get frameTopLeftCoord() {
+    return this.frameArr.reduce((result, coords) => {
+      if (result[0] > coords[0] && result[1] > coords[1]) {
+        return coords;
+      }
+      return result
+    });
+  }
+
+  get frameTopRightCoord() {
+    return this.frameArr.reduce((result, coords) => {
+      if (result[0] < coords[0] && result[1] > coords[1]) {
+        return coords;
+      }
+      return result
+    });
+  }
+
+  get frameBottomRightCoord() {
+    return this.frameArr.reduce((result, coords) => {
+      if (result[0] < coords[0] && result[1] < coords[1]) {
+        return coords;
+      }
+      return result
+    });
+  }
+
+  get frameBottomLeftCoord() {
+    return this.frameArr.reduce((result, coords) => {
+      if (result[0] > coords[0] && result[1] < coords[1]) {
+        return coords;
+      }
+      return result
+    });
+  }
+
+  // NB: This doesn't return the actual coordinate
+  // it returns the smallest X and the smallest Y.
   get frameTopLeft() {
     var minX = Infinity, minY = Infinity;
 
@@ -94,11 +139,80 @@ class Impose {
   }
 
   get frameCenter() {
-
     return calcMidPoint(
       calcMidPoint(this.frameTopLeft, this.frameTopRight),
       calcMidPoint(this.frameBottomLeft, this.frameBottomRight),
     );
+  }
+
+  get frameCentroid() {
+    let x = 0, y = 0;
+    const l = this.frameArr.length;
+
+    this.frameArr.forEach(coords => {
+      x += coords[0];
+      y += coords[1];
+    });
+
+    return [x / l, y / l];
+  }
+
+  drawRect(ctx) {
+    ctx.strokeStyle = '#f00';
+    ctx.beginPath();
+    ctx.moveTo(...this.frameTopLeft);
+    ctx.lineTo(...this.frameTopRight);
+    ctx.lineTo(...this.frameBottomRight);
+    ctx.lineTo(...this.frameBottomLeft);
+    ctx.lineTo(...this.frameTopLeft);
+    ctx.stroke();
+    ctx.closePath();
+  }
+
+  imposeImage(template, context, image) {
+
+    // const context = document.createElement("canvas").getContext("2d");
+    if (!template) return;
+
+    const scale = this.similarityTransform[1];
+
+    const { width, height } = template;
+
+    const w = width / scale;
+    const h = height / scale;
+
+    context.save()
+    // context.translate(
+    //   this.frameCentroid[0] - (w / 2),
+    //   this.frameCentroid[1] - (h / 2)
+    // )
+    // context.rotate(this.rotationDeg * Math.PI / 180);
+
+    context.beginPath();
+    context.strokeStyle = 'white';
+    const rect = context.rect(
+      this.frameCentroid[0] - (w / 2),
+      this.frameCentroid[1] - (h / 2),
+      w,
+      h
+    );
+
+    context.stroke();
+
+    // context.restore();
+
+    // const img = new Image();
+    // img.src = "./assets/ar-card-small.jpg";
+    // img.crossOrigin = "Anonymous";
+
+    // context.drawImage(
+    //   img,
+    //   this.frameCentroid[0] - (w / 2),
+    //   this.frameCentroid[1] - (h / 2),
+    //   w,
+    //   h
+    // );
+
   }
 }
 
@@ -115,16 +229,12 @@ const calcMidPoint = (a, b) => {
   return [x, y];
 }
 
-const printDot = (coords, color = 'green') => {
-  var canvas = document.getElementById("canvas-overlay");
-  var context = canvas.getContext("2d");
-
-  context.beginPath();
-  context.arc(coords[0], coords[1], 3, 0, 2 * Math.PI);
-  context.fillStyle = color;
-  context.fill();
+const printDot = (coords, color = 'green', ctx) => {
+  ctx.beginPath();
+  ctx.arc(coords[0], coords[1], 3, 0, 2 * Math.PI);
+  ctx.fillStyle = color;
+  ctx.fill();
 }
-
 
 const onClick = (data, context) => {
   var canvas = document.getElementById("canvas-overlay");
@@ -134,15 +244,21 @@ const onClick = (data, context) => {
 
   const imposer = new Impose(data);
 
-  console.log('Confidence Arr: ', imposer.normalizedConfidenceArr);
-  console.log('Average confidence: ', imposer.meanConfidence)
+  // console.log('Confidence Arr: ', imposer.normalizedConfidenceArr);
+  // console.log('Average confidence: ', imposer.meanConfidence)
 
   // console.log("Tracking Data: ", data);
-  // console.log("Transform Data: ", imposer.similarityTransform);
+  console.log("Transform Data: ", imposer.similarityTransform);
+  console.log("Transform Deg: ", imposer.rotationDeg);
 
-  printDot(imposer.frameTopLeft);
-  printDot(imposer.frameBottomLeft);
-  printDot(imposer.frameBottomRight);
-  printDot(imposer.frameTopRight);
-  printDot(imposer.frameCenter, 'red');
+  // printDot(imposer.frameTopLeftCoord, 'orange', context);
+  // printDot(imposer.frameBottomLeftCoord, 'orange', context);
+  // printDot(imposer.frameBottomRightCoord, 'orange');
+  // printDot(imposer.frameTopRightCoord, 'orange');
+  // printDot(imposer.frameTopLeft);
+  // printDot(imposer.frameBottomLeft);
+  // printDot(imposer.frameBottomRight);
+  // printDot(imposer.frameTopRight);
+  // printDot(imposer.frameCenter, 'pink');
+  // printDot(imposer.frameCentroid, 'red');
 }
