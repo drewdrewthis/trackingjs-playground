@@ -12,19 +12,11 @@
     <script src="../../script.js"></script>
 
     <style>
-      #boundingBox {
-        display: none;
-        position: absolute;
-        background: white;
-        border: 1px dashed;
-        opacity: 0.5;
-        z-index: 1;
-      }
       #video,
       canvas {
         position: absolute;
-        margin-left: 230px;
-        margin-top: 120px;
+        margin-left: 10%;
+        margin-top: 200px;
         cursor: crosshair;
         z-index: 1;
       }
@@ -39,6 +31,9 @@
         -ms-user-select: none;
         user-select: none;
       }
+      .demo-container {
+        height: 100vh;
+      }
     </style>
   </head>
   <body>
@@ -49,23 +44,19 @@
       </p>
     </div>
 
-    <div id="boundingBox"></div>
-
-    <div class="demo-frame">
-      <div class="demo-container">
-        <video
-          id="video"
-          width="393"
-          height="295"
-          preload
-          autoplay
-          loop
-          muted
-          controls
-        ></video>
-        <canvas id="canvas-overlay" width="800" height="530"></canvas>
-        <canvas id="canvas" width="800" height="530"></canvas>
-      </div>
+    <div class="demo-container">
+      <video
+        id="video"
+        width="393"
+        height="295"
+        preload
+        autoplay
+        loop
+        muted
+        controls
+      ></video>
+      <canvas id="canvas-overlay" width="800" height="530"></canvas>
+      <canvas id="canvas" width="800" height="530"></canvas>
     </div>
 
     <script>
