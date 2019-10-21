@@ -1,0 +1,22 @@
+#video,
+canvas {
+  /* position: absolute; */
+  margin-left: 10%;
+  margin-top: 200px;
+  cursor: crosshair;
+  z-index: 1;
+}
+#canvas-overlay {
+  z-index: 10;
+}
+body {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+.demo-container {
+  height: 100vh;
+}

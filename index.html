@@ -1,13 +1,29 @@
-< !doctype html >
+<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
     <title>tracking.js - first tracking</title>
-    <script src="../build/tracking-min.js"></script>
+    <script src="tracking.js-master/build/tracking-min.js"></script>
+    <style src="styles.css"></style>
+    <script src="js/utils.js"></script>
   </head>
   <body>
-    <script>
-      // Start tracking here...
-    </script>
+    <div class="demo-container">
+      <video
+        id="video"
+        width="393"
+        height="295"
+        preload
+        autoplay
+        loop
+        muted
+        controls
+        playsinline
+      ></video>
+      <canvas id="canvas-overlay" width="800" height="530"></canvas>
+      <canvas id="canvas" width="800" height="530"></canvas>
+      <canvas id="imageCanvas" width="800" height="530"></canvas>
+    </div>
+    <script src="script.js"></script>
   </body>
 </html>

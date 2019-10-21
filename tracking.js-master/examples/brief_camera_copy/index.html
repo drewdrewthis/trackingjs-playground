@@ -4,13 +4,13 @@
     <title>tracking.js - bounding box with camera</title>
 
     <meta charset="utf-8" />
-    <link rel="stylesheet" href="assets/demo.css" />
+    <link rel="stylesheet" href="../assets/demo.css" />
 
-    <script src="../build/tracking-min.js"></script>
+    <script src="../../build/tracking-min.js"></script>
     <!-- <script src="../node_modules/dat.gui/build/dat.gui.min.js"></script> -->
 
-    <script src="assets/stats.min.js"></script>
-    <script src="../../script.js"></script>
+    <script src="../assets/stats.min.js"></script>
+    <script src="script.js"></script>
 
     <style>
       #video,
@@ -245,7 +245,7 @@
           const ctx = document.createElement("canvas").getContext("2d");
           const image = new Image();
 
-          image.src = "./assets/ar-card-small.jpg";
+          image.src = "../assets/ar-card-small.jpg";
           image.crossOrigin = "Anonymous";
           image.onload = () => {
             ctx.drawImage(image, 0, 0);
