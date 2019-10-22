@@ -1,8 +1,12 @@
-#video,
+#video {
+  visibility: hidden;
+  position: absolute;
+}
+
 canvas {
   /* position: absolute; */
   margin-left: 10%;
-  margin-top: 200px;
+  /* margin-top: 200px; */
   cursor: crosshair;
   z-index: 1;
 }
@@ -19,4 +23,8 @@ body {
 }
 .demo-container {
   height: 100vh;
+}
+
+canvas {
+  border: 1px solid black;
 }
