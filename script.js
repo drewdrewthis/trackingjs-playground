@@ -65,9 +65,9 @@ function startTracker(
 
   var tracker = new ObjectTracker();
 
-  tracker.on("track", (event, context) => {
-    requestFrame();
-    onTrack(event);
+  tracker.on("track", (event) => {
+    // requestFrame();
+    onTrack(event, context);
   });
 
   var trackerTask = tracking.track(video, tracker, {
@@ -87,18 +87,6 @@ function startTracker(
   trackerTask.run();
 
   // Sync video ============================================================
-  function requestFrame() {
-    window.requestAnimationFrame(function () {
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      if (video.readyState === video.HAVE_ENOUGH_DATA) {
-        try {
-          context.drawImage(video, 0, 0, video.width, video.height);
-        } catch (err) { }
-      }
-
-      // requestFrame();
-    });
-  };
 
 
 };
@@ -122,16 +110,89 @@ function videoTemplateTrack() {
 
     var boxLeft = video.width;
 
+    function requestFrame(context) {
+      window.requestAnimationFrame(function () {
+        context.clearRect(0, 0, canvas.width, canvas.height);
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+          try {
+            context.drawImage(video, 0, 0, video.width, video.height);
+          } catch (err) { }
+        }
+
+        // requestFrame();
+      });
+    };
+
     startTracker(
       document.getElementById("video"),
       document.getElementById("canvas"),
       templateImageData,
       function (event, context) {
+        requestFrame(context);
+
         if (capturing) {
           return;
         }
 
         var context = canvas.getContext("2d");
+
+        trackingData = event.data;
+
+        // Re - draws template on canvas.
+        // context.putImageData(templateImageData, boxLeft, 0);
+
+        // Plots lines connecting matches.
+        event.data.forEach(match => {
+          var conf = match.confidence;
+          conf = conf - event.data[event.data.length - 1].confidence;
+          var confidence = conf * (1 / event.data[0].confidence);
+
+          var template = match.keypoint1;
+          var frame = match.keypoint2;
+          context.beginPath();
+          context.strokeStyle = 'red'
+          context.moveTo(frame[0], frame[1]);
+          context.lineTo(boxLeft + template[0], template[1]);
+          context.stroke();
+        });
+      }
+    );
+  };
+
+  image.crossOrigin = "Anonymous";
+  image.src = "assets/ar-card-small.jpg";
+}
+
+function staticTrack(sourceId, canvasId) {
+  // Get ImageData
+  const ctx = document.createElement("canvas").getContext("2d");
+  const image = new Image();
+
+  image.onload = () => {
+    // Get Template Image
+    ctx.drawImage(image, 0, 0);
+    width = image.width;
+    height = image.height;
+    templateImageData = ctx.getImageData(0, 0, width, height);
+    console.log("Image Loaded: ", templateImageData);
+
+    const sourceImage = document.getElementById(sourceId);
+    // const context = document.getElementById("canvas2").getContext('2d');
+
+    const canvas = document.getElementById(canvasId);
+    canvas.getContext('2d').drawImage(sourceImage, 0, 0, video.width, video.height);
+
+    // context.putImageData(templateImageData, sourceImage.width, 0);
+
+    startTracker(
+      sourceImage,
+      canvas,
+      templateImageData,
+      function (event, context) {
+        var boxLeft = sourceImage.width;
+        // if (capturing) {
+        //   return;
+        // }
 
         trackingData = event.data;
 
@@ -162,4 +223,6 @@ function videoTemplateTrack() {
 
 window.addEventListener('load', () => {
   videoTemplateTrack();
+  staticTrack('sourceImage', 'canvas2');
+  staticTrack('sourceImage2', 'canvas3');
 })

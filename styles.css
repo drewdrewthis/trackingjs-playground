@@ -1,4 +1,5 @@
-#video {
+#video,
+img {
   visibility: hidden;
   position: absolute;
 }
