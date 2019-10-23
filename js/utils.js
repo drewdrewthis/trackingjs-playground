@@ -7,7 +7,7 @@ const normalize = (arr) => {
 
 
 class Impose {
-  constructor(data) {
+  constructor(data, shift) {
     data.sort(function (a, b) {
       return b.confidence - a.confidence;
     });
@@ -15,9 +15,9 @@ class Impose {
     // data.length = 10;
 
     this.matchArr = data;
-
     this.templateArr = data.map(match => match.keypoint1);
     this.frameArr = data.map(match => match.keypoint2);
+    this.shift = shift;
   }
 
   get confidenceArr() {
@@ -157,6 +157,66 @@ class Impose {
     return [x / l, y / l];
   }
 
+  get templateCentroid() {
+    let x = 0, y = 0;
+    const l = this.templateArr.length;
+
+    this.templateArr.forEach(coords => {
+      x += coords[0] + this.shift;
+      y += coords[1];
+    });
+
+    return [x / l, y / l];
+  }
+
+  // http://mathforum.org/library/drmath/view/77932.html
+  get frameTilt() {
+    let posSlope = 0;
+    let negSlope = 0;
+    let posCount = 0;
+    let negCount = 0;
+    const center = this.frameCentroid;
+
+    this.matchArr.forEach(match => {
+      var frame = match.keypoint2;
+
+      if (match.index1 < 10) {
+        const s = calcSlope(frame, center);
+        if (s > 0) {
+          posSlope += s;
+          posCount++;
+        } else {
+          negSlope += s;
+          negCount++;
+        }
+
+        // console.log(
+        //   s,
+        //   frame,
+        //   center,
+        //   match.index1);
+      }
+    })
+
+
+    // posSlope /= posCount || 1;
+    // negSlope /= negCount || 1;
+
+    const sign = posSlope > -1 * negSlope ? 1 : -1;
+
+    console.log(posSlope, negSlope)
+
+    return posSlope * (sign * negSlope) / (posCount + negCount)
+
+    return (
+      Math.sqrt(
+        ((posSlope ** 2) + 1) * ((negSlope ** 2) + 1)
+      ) + (posSlope * negSlope - 1))
+      / (posSlope + negSlope);
+
+    // return slope / count;
+  }
+
   drawRect(ctx) {
     ctx.strokeStyle = '#f00';
     ctx.beginPath();
@@ -262,3 +322,44 @@ const onClick = (data, context) => {
   // printDot(imposer.frameCenter, 'pink');
   // printDot(imposer.frameCentroid, 'red');
 }
+
+const drawConnectingLines = (arr, context, shift) => {
+  // var conf = match.confidence;
+  // conf = conf - event.data[event.data.length - 1].confidence;
+  // var confidence = conf * (1 / event.data[0].confidence);
+
+  arr.forEach(match => {
+    var template = match.keypoint1;
+    var frame = match.keypoint2;
+    context.beginPath();
+
+    if (match.index1 < 10) {
+      context.strokeStyle = 'red'
+    } else {
+      context.strokeStyle = 'green'
+    }
+
+    context.moveTo(frame[0], frame[1]);
+    context.lineTo(shift + template[0], template[1]);
+    context.stroke();
+  })
+};
+
+const drawLine = (context, pt1, pt2) => {
+  context.beginPath();
+  context.moveTo(pt1[0], pt1[1]);
+  context.lineTo(pt2[0], pt2[1]);
+  context.strokeStyle = 'orange'
+  context.stroke();
+}
+
+const calcSlope = (pt, center) => {
+  return (-pt[1] + center[1]) / (pt[0] - center[0]);
+};
+
+// 2.460784313725491(2)[173, 130](2)[186, 161.99019607843138]
+
+console.log(
+  (1.30 - 1.62) /
+  (1.73 - 1.86)
+)

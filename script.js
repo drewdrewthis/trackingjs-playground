@@ -194,25 +194,41 @@ function staticTrack(sourceId, canvasId) {
         //   return;
         // }
 
-        trackingData = event.data;
+        trackingData = utils2
+          .sortByConfidence(event.data)
+
+        // trackingData.length = 20;
+
 
         // Re - draws template on canvas.
         context.putImageData(templateImageData, boxLeft, 0);
 
-        // Plots lines connecting matches.
-        event.data.forEach(match => {
-          var conf = match.confidence;
-          conf = conf - event.data[event.data.length - 1].confidence;
-          var confidence = conf * (1 / event.data[0].confidence);
+        // console.log(sourceId, trackingData)
 
-          var template = match.keypoint1;
-          var frame = match.keypoint2;
-          context.beginPath();
-          context.strokeStyle = 'red'
-          context.moveTo(frame[0], frame[1]);
-          context.lineTo(boxLeft + template[0], template[1]);
-          context.stroke();
-        });
+        const imposer = new Impose(event.data, boxLeft);
+        const {
+          frameCentroid,
+          templateCentroid,
+          frameTilt
+        } = imposer;
+
+        // Plots lines connecting matches.
+        drawConnectingLines(trackingData, context, boxLeft)
+
+        printDot(frameCentroid, 'white', context);
+        printDot(templateCentroid, 'green', context);
+        console.log(frameTilt)
+
+        const sign = frameTilt < 0 ? -1 : 1;
+
+        drawLine(
+          context,
+          frameCentroid,
+          [
+            frameCentroid[1] + 1000 * sign,
+            frameCentroid[0] + (-1000 * frameTilt * sign)
+          ],
+        );
       }
     );
   };
